@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
 
+
 export default function ExpenseForm() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -18,19 +19,31 @@ export default function ExpenseForm() {
 
     try {
       // Get the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await  supabase.auth.getUser();
       if (userError || !user) {
         throw new Error("User not authenticated");
-      }
+      } 
 
+      const {
+        data: { session },
+        error: sessionError
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        throw new Error("Unable to retrieve user session");
+      }
+  
       // Call the Supabase Edge Function to get category
       const funcRes = await fetch(
-        "https://lvroveysnfgmqtdyayiu.functions.supabase.co/categorize-expense",
+        
+       "https://lvroveysnfgmqtdyayiu.functions.supabase.co/categorize-expense",
+   
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ***REMOVED***`,
+             Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+           
           },
           body: JSON.stringify({ description }),
         }
